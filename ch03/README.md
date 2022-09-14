@@ -22,3 +22,80 @@
 - 행(=로우=레코드): 행의 개수는 데이터의 개수로 보장된다.
 - 기본키(primary key): 각 행을 구분하는 유일한 열이다. 예를들어, 쇼핑몰의 아이디와 같다. 즉, 중복되지 않고, 비어있으면 안되며 반드시 존재해야한다.
 - SQL: 사람의 말로 DBMS가 못알아들으므로 DBMS가 알아들을 수 있게 소통하는 언어를 SQL이라고 한다.
+
+## MySQL을 이용한 데이터베이스 구축 절차
+
+### 데이터베이스 생성
+
+워크벤치나 Datagrip을 켜고 쇼핑몰 데이터 베이스를 생성해보자.
+
+```
+CREATE SCHEMA `shopdb`;
+```
+
+위의 쿼리를 터미널에서 명령하거나 워크벤치에서 스키마 공란에 오른쪽 마우스를 눌러 create schema를 눌러서 지정해주면 아래 그림처럼 적용하면 생성이 된다.
+
+### 테이블 생성
+
+테이블을 생성함에 있어서 테이블 설계도가 필요하다. 설계도에 따라 테이블을 만들면 되는데 sql로는 아래와 같다.
+
+```
+CREATE TABLE `shopdb`.`memberTBL` (
+  `memberID` CHAR(8) NOT NULL,
+  `memberName` CHAR(5) NOT NULL,
+  `memberAddress` CHAR(20) NULL,
+  PRIMARY KEY (`memberID`));
+
+ CREATE TABLE `shopdb`.`productTBL` (
+  `productName` CHAR(4) NOT NULL,
+  `cost` INT NOT NULL,
+  `makeDate` DATE NULL,
+  `company` CHAR(5) NULL,
+  `amount` INT NOT NULL,
+  PRIMARY KEY (`productName`));
+```
+
+워크벤치로는 방금만든 스키마 오른쪽 마우스를 눌러서 create table을 눌러서 아래 그림처럼 값을 넣어주면 된다.
+
+### 데이터 입력
+
+이제 데이터를 입력해보자. sql로는 아래와 같다.
+
+```
+-- member table data insert
+INSERT INTO `shopdb`.`memberTBL` (`memberID`, `memberName`, `memberAddress`) VALUES ('Dang', '당탕이', '경기 부천시 중동');
+INSERT INTO `shopdb`.`memberTBL` (`memberID`, `memberName`, `memberAddress`) VALUES ('Jee', '지운이', '서울 은평구 증산동');
+INSERT INTO `shopdb`.`memberTBL` (`memberID`, `memberName`, `memberAddress`) VALUES ('Han', '한주연', '인천 남구 주안동');
+INSERT INTO `shopdb`.`memberTBL` (`memberID`, `memberName`, `memberAddress`) VALUES ('Sang', '상길이', '경기 성남시 분당구');
+
+-- product table data insert
+INSERT INTO `shopdb`.`productTBL` (`productName`, `cost`, `makeDate`, `company`, `amount`) VALUES ('컴퓨터', '10', '2021-01-01', '삼성', '17');
+INSERT INTO `shopdb`.`productTBL` (`productName`, `cost`, `makeDate`, `company`, `amount`) VALUES ('세탁기', '20', '2022-09-01', 'LG', '3');
+INSERT INTO `shopdb`.`productTBL` (`productName`, `cost`, `makeDate`, `company`, `amount`) VALUES ('냉장고', '5', '2023-02-01', '대우', '22');
+```
+
+워크벤치로는 아래와 같다.
+
+### 데이터 활용
+
+이제 데이터를 활용해보자. 먼저 우리가 만든 shopdb를 더블클릭하자. 그러면 shopdb로 접속이 된다. sql로는 아래와 같다.
+
+```
+use shopdb;
+```
+
+이제 모든 회원 테이블을 조회해보자.
+
+```
+SELECT * FROM memberTBL;
+```
+
+처음으로 나온 sql문은 SELECT문인데 기본형태가 SELECT 열 이름 FROM 테이블 이름 \[WHERE 조건\] 형식을 갖는다. 열 이름에 \* 를 쓰면 모든 열을 뜻한다. 이제 select문으로 특정 컬럼 조회, 특정 데이터 조회도 가능하다.
+
+```
+-- 특정 컬럼 조회
+SELECT memberName, memberAddress FROM memberTBL;
+
+-- 특정 데이터 조회
+SELECT memberName, memberAddress FROM memberTBL WHERE memberName='상길이';
+```

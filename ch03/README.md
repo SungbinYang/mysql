@@ -146,3 +146,89 @@ CREATE INDEX idx_indexTBL_firstname on indexTBL(first_name);
 그 후에, 다시한번 select 쿼리를 날려보자. 그럼 아래처럼 non-unique key lookup 방식을 쓴다.
 
 이처럼 인덱스는 실무에서 진짜 많이 사용하는 방식이다.
+
+​
+## 데이터베이스 개체 - 뷰, 저장 프로시저, 트리거
+### 뷰
+뷰란 일종의 가상의 테이블이다. 그말은 즉, 테이블처럼 보이지만 테이블은 아닌 경우를 말한다. 쉽게 말하면 일종의 테이블 바로가기 아이콘으로 테이블에 링크된 개념으로 보면 된다. 그러면 뷰는 어디서 쓸까?
+​
+예를 들어, 어느 인턴분이 DB 데이터 최신화 작업을 하고 있다고 가정하자. 그 인턴분에게는 사용자의 중요 개인정보를 열람하게 되는데 그러다가 실수로 데이터를 날리거나 잘못 변경되면 운영에 큰 문제가 발생할 것이다. 그래서 이런 경우를 대비해 뷰를 통하여 인턴분에게 보여줄 가짜 테이블을 보여주는 것이다. 이 가짜 테이블은 진짜 데이터는 아니고 옆의 진짜 테이블의 데이터와 연결된 것이라 봐도 무방하다. 그럼 실습을 통해 알아보자.
+​
+뷰 생성 쿼리는 다음과 같다.
+​
+``` sql
+-- view 생성
+CREATE VIEW uv_memberTBL
+AS
+    SELECT memberID, memberAddress FROM memberTBL;
+```
+​
+``` sql
+-- 뷰 데이터 조회
+SELECT * FROM uv_memberTBL;
+```
+​
+### 스토어드 프로시저
+MySQL에서 제공해주는 프로그래밍 기능으로 다른 프로그래밍 언어와 같은 기능을 담당한다. 그럼 실습을 통해 확인해보자.
+​
+두개의 데이터를 조회하는 쿼리이다.
+​
+``` sql
+-- 데이터 조회 (프로시저 전)
+SELECT * FROM memberTBL WHERE memberName = '당탕이';
+SELECT * FROM productTBL WHERE productName = '냉장고';
+```
+​
+이 쿼리를 묶어서 프로시저로 만들려면 아래와 같이 하면 된다.
+​
+``` sql
+-- 프로시저 생성
+DELIMITER //
+CREATE PROCEDURE myProc()
+BEGIN
+    SELECT * FROM memberTBL WHERE memberName = '당탕이';
+    SELECT * FROM productTBL WHERE productName = '냉장고';
+END //
+DELIMITER ;
+```
+​
+후에 프로시저를 호출해주면 된다.
+​
+``` sql
+CALL myProc();
+```
+​
+### 트리거
+트리거란 테이블에 부착되어서 테이블에 INSET나 UPDATE 또는 DELETE 작업이 발생되면 실행되는 코드를 말한다. 그러면 트리거는 어디서 사용할까?
+​
+예를 들어 회원 테이블이 있는데 그 중 한 회원이 탈퇴를 하였다. 그 후에, 회사에 와서 자기 탈퇴전 이력을 달라고 요청할 때, 그럴 때 사용이 가능하다.
+​
+실습을 해보자. 먼저 탈퇴회원 테이블을 만든다.
+​
+``` sql
+-- 멤버 탈퇴 테이블 작성
+CREATE TABLE deletedMemberTBL (
+    memberID char(8),
+    memberName char(5),
+    memberAddress char(20),
+    deletedDate date -- 삭제한 날짜
+);
+```
+​
+그 후에 트리거를 부착한다.
+​
+``` sql
+-- 트리거 생성
+DELIMITER //
+CREATE TRIGGER trg_deletedMemberTBL -- 트리거 이름
+    AFTER DELETE -- 삭제 후에 작동하게 지정
+    ON MEMBERTBL -- 트리거를 부착할 테이블
+    FOR EACH ROW -- 각 행마다 적용
+BEGIN
+    -- OLD 테이블의 내용을 백업테이블에 삽입
+    INSERT INTO deletedMemberTBL VALUES (OLD.memberID, OLD.memberName, OLD.memberAddress, CURDATE());
+END //
+DELIMITER ;
+```
+​
+후에, 트리거 부착한 테이블에 DELETE 쿼리를 날리면 자동으로 탈퇴회원테이블에 INSERT가 될 것이다.

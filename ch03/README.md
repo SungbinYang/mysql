@@ -99,3 +99,50 @@ SELECT memberName, memberAddress FROM memberTBL;
 -- 특정 데이터 조회
 SELECT memberName, memberAddress FROM memberTBL WHERE memberName='상길이';
 ```
+
+## 테이블 외의 데이터베이스 개체의 활용
+테이블 외에 다른 중요한 데이터베이스 개체로는 인덱스, 스토어드 프로시저, 트리거, 커서등이 있다.
+
+### 인덱스
+없어도 문제가 없지만 있으면 효율적이다. 예시를 들자면 책의 찾아보기 기능과 같다. 즉, 찾아보기를 통해 검색하고자 하는걸 굉장히 빠르게 찾을 수 있으며, 주고 sql문의 select문과 많이 사용된다. 그럼 실습을 통해 인덱스 생성 및 장점을 살펴보자.
+
+먼저 인덱스를 테스트할 테이블을 하나 만든다.
+
+``` sql
+-- 인덱스 테이블 만들기
+CREATE TABLE indexTBL (
+	first_name varchar(14), 
+    last_name varchar(16), 
+    hire_date date
+);
+```
+
+다음으로 더미데이터를 방금 만든 테이블이 넣는다. 더미 데이터는 이전에 설치한 샘플 데이터베이스를 가져온다.
+
+``` sql
+-- 더미 데이터 만들기
+INSERT INTO indexTBL
+	SELECT first_name, last_name, hire_date
+    FROM employees.employees
+    LIMIT 500;
+```
+
+그럼 이때 특정 더미데이터를 한번 조회해본다.
+
+``` sql
+-- 특정 더미 데이터 조회
+SELECT * FROM indexTBL WHERE first_name = 'Mary';
+```
+
+이때 검색하는데 시간과 방법은 아래처럼 full scan을 한 방법이다. 즉, 책으로 치면 처음부터 끝까지 스캔해서 찾은 방법이다.
+
+하지만 인덱스를 사용해서 하면 어떨까? 한번 인덱스를 생성해보자.
+
+``` sql
+-- 인덱스 생성
+CREATE INDEX idx_indexTBL_firstname on indexTBL(first_name);
+```
+
+그 후에, 다시한번 select 쿼리를 날려보자. 그럼 아래처럼 non-unique key lookup 방식을 쓴다.
+
+이처럼 인덱스는 실무에서 진짜 많이 사용하는 방식이다.

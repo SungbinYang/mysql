@@ -245,3 +245,108 @@ DBA에 있어서 백업과 복원은 정말 중요한 작업이니 잘 공부해
 다음으로 복원을 해보자. 복원도 백업처럼 백업파일 설정해주고 스키마 설정해주고 복원해준다.
 
 정상적으로 완료되면 아래와 같이 나온다.
+
+> [이것이 mysql이다.](http://www.yes24.com/Product/Goods/90118480)책을 참고하여 작성하였습니다.
+
+## MySQL과 응용프로그램 연동
+
+우리는 이제까지 mysql에 대한 전반적인 내용을 간단하게 확인해봤다. 그러면 이제 마지막으로 실무처럼 DB를 웹에 연동하는 방법을 확인해보겠다. 책에서는 C#으로 하였지만 난 PHP로 테스트를 해보겠다.
+
+### PHP 설치
+맥에서 Homebrew로 설치하면 다음과 같다.
+
+``` shell
+brew install php@7.4
+```
+
+그 후에 PHP가 제대로 설치가 되었는지 ```php -v ```로 확인해보면 버전이 나올것이다. 혹시 zsh를 사용하는 분이라면 아래의 명령어를 작성해주면 될 것이다.
+
+``` shell
+brew tap shivammathur/php
+```
+
+``` shell
+brew install shivammathur/php/php@7.4
+```
+
+``` shell
+brew link --overwrite --force php@7.4
+```
+
+``` shell
+php -v
+```
+
+### PHPStrom 환경설정
+에디터로는 PHPStrom을 사용할 것이다. 다운로드 경로는 [여기](https://www.jetbrains.com/ko-kr/phpstorm/download/#section=mac)를 클릭하기를 바란다.
+
+설치 후에, PHP 빈 프로젝트를 설정 후 접속 후, 환경설정을 해준다.
+
+JDK처럼 PHP도 php.ini를 설정해주어야 한다. 그래서 위의 그림처럼 +버튼을 눌러 php.ini 경로를 불러와주고 apply를 누른다.
+
+### PHPStrom mysql 연동
+이제 DB연동을 해보자. connection.php를 만들어서 DB정보를 작성해준다. 그 후에, user.php에 connection.php를 import 시키고 나머지 부분을 작성한다. 이 포스팅은 php관련 포스팅이 아니기때문에 자세한 문법은 생략하고 아래와 같이 작성한다.
+
+1. connection.php
+
+``` php
+<?php
+    /**
+     * DB Connection Settings
+     */
+
+    $host = "localhost";
+    $user = "root";
+    $password = "1234";
+    $database = "shopdb";
+    $port = 3306;
+
+    $con = mysqli_connect($host, $user, $password, $database, $port);
+
+    function mq($sql) {
+        global $con;
+
+        return $con -> query($sql);
+    }
+?>
+```
+
+2. user.php
+
+``` php
+<?php
+    include_once 'connection.php';
+?>
+
+<?php
+    $sql = mq("SELECT * FROM memberTBL");
+    $arr = mysqli_fetch_array($sql);
+?>
+
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>멤버 리스트</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>memberID</th>
+            <th>memberName</th>
+            <th>memberAddress</th>
+        </tr>
+        <tr>
+            <td><?=$arr[0] ?></td>
+            <td><?=$arr[1] ?></td>
+            <td><?=$arr[2] ?></td>
+        </tr>
+    </table>
+</body>
+</html>
+```
+
+그러면 아래와 같이 화면이 나온다.

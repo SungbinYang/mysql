@@ -5,7 +5,7 @@
 
     $host = "localhost";
     $user = "root";
-    $password = "y801933601@";
+    $password = "1234";
     $database = "shopdb";
     $port = 3306;
 

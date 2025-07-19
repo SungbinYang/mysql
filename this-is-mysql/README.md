@@ -7,3 +7,4 @@
 ## 1장. DBMS 개요와 MySQL 소개
 
 - DBMS 개요와 MySQL 소개(1)
+- DBMS 개요와 MySQL 소개(2)
